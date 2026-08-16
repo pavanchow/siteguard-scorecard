@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-dark-900 text-white;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-dark-800 rounded-xl p-6 border border-dark-700 shadow-lg;
+  }
+  
+  .grade-badge {
+    @apply inline-flex items-center justify-center w-16 h-16 rounded-full text-3xl font-bold;
+  }
+  
+  .grade-a { @apply grade-badge bg-green-500/20 text-green-400 border-2 border-green-500; }
+  .grade-b { @apply grade-badge bg-blue-500/20 text-blue-400 border-2 border-blue-500; }
+  .grade-c { @apply grade-badge bg-yellow-500/20 text-yellow-400 border-2 border-yellow-500; }
+  .grade-d { @apply grade-badge bg-orange-500/20 text-orange-400 border-2 border-orange-500; }
+  .grade-f { @apply grade-badge bg-red-500/20 text-red-400 border-2 border-red-500; }
+  
+  .severity-high { @apply bg-red-500/20 text-red-400 border-red-500; }
+  .severity-medium { @apply bg-orange-500/20 text-orange-400 border-orange-500; }
+  .severity-low { @apply bg-yellow-500/20 text-yellow-400 border-yellow-500; }
+  .severity-info { @apply bg-blue-500/20 text-blue-400 border-blue-500; }
+}
