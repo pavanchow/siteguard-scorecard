@@ -1,0 +1,16 @@
+{
+  "name": "siteguard-scorecard",
+  "version": "1.0.0",
+  "description": "Website security scanning tool",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "scanner"
+  ],
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:scanner": "cd scanner && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "deploy:scanner": "cd scanner && npm run deploy"
+  }
+}

@@ -1,0 +1,43 @@
+```
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.coverage
+coverage/
+htmlcov/
+
+# TypeScript/JavaScript
+*.tsbuildinfo
+.next/
+.nuxt/
+.vuepress/dist
+.output
+
+# Environment variables
+.env
+.env.local
+!.env.example
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Astro specific
+.frontend/.astro/
+```
