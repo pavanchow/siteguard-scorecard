@@ -5,9 +5,17 @@ import { performSecurityScan } from './scanner';
 // Create Hono app
 const app = new Hono();
 
-// Enable CORS for frontend access
+// Enable CORS for frontend access. An array origin is matched exactly, so a
+// `*.github.io` wildcard would not match the real Pages origin; use a matcher
+// that echoes any github.io Pages host and localhost dev, and falls back to *.
 app.use('/*', cors({
-  origin: ['*', 'http://localhost:4321', 'https://*.github.io'],
+  origin: (origin) => {
+    if (!origin) return '*';
+    if (origin.endsWith('.github.io') || origin.startsWith('http://localhost')) {
+      return origin;
+    }
+    return '*';
+  },
   allowMethods: ['GET', 'POST', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
   maxAge: 86400,
