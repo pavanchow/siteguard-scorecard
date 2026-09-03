@@ -1,4 +1,3 @@
-```
 # Dependencies
 node_modules/
 .pnpm-store/
@@ -22,6 +21,9 @@ htmlcov/
 .env.local
 !.env.example
 
+# Cloudflare / Wrangler
+.wrangler/
+
 # IDE specific
 .vscode/
 .idea/
@@ -39,5 +41,4 @@ Thumbs.db
 *.tmp
 
 # Astro specific
-.frontend/.astro/
-```
+.astro/

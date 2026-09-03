@@ -1,6 +1,19 @@
 # SiteGuard Scorecard
 
 A comprehensive website security scanning tool built with modern web technologies.
+Enter a URL and get a graded (A-F) security scorecard covering headers, cookies,
+exposed files, TLS, mixed content, and subdomain-takeover risk.
+
+## Status
+
+- Frontend (Astro + React): builds clean, deploys to GitHub Pages via GitHub Actions.
+  Live URL: https://pavanchow.github.io/v1/
+- Scanner (Cloudflare Worker): builds clean, 17 passing `vitest` tests, verified
+  end-to-end against live sites with `wrangler dev`. Not yet deployed to Cloudflare
+  (needs a Cloudflare account/API token, see Deployment below).
+- Because the Worker is not deployed yet, the hosted frontend defaults its API base
+  to `http://localhost:8787`. Run the Worker locally, or set `PUBLIC_WORKER_URL`
+  (see Configuration) to point the hosted UI at a deployed Worker.
 
 ## Features
 
@@ -54,8 +67,8 @@ A comprehensive website security scanning tool built with modern web technologie
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd siteguard-scorecard
+git clone https://github.com/pavanchow/v1.git
+cd v1
 ```
 
 2. Install dependencies:
@@ -75,56 +88,72 @@ cd ../scanner && npm install
 
 ### Local Development
 
+**Run Scanner (Cloudflare Worker) first:**
+```bash
+cd scanner
+npm run dev          # wrangler dev, serves at http://localhost:8787
+```
+
 **Run Frontend:**
 ```bash
 cd frontend
-npm run dev
+npm run dev          # astro dev, serves at http://localhost:4321/v1/
 ```
-The frontend will be available at `http://localhost:4321`
+The frontend defaults to calling the Worker at `http://localhost:8787`, so with
+both running you can scan a site end to end from the browser.
 
-**Run Scanner (Cloudflare Worker):**
+### Testing
+
 ```bash
 cd scanner
-npm run dev
+npm test             # vitest run - 17 unit tests for the core checks + grading
+npm run typecheck    # tsc --noEmit
 ```
-The scanner API will be available at `http://localhost:8787`
 
 ### Configuration
 
-Update the worker URL in the frontend if deploying to production:
+The frontend reads the Worker API base URL from the `PUBLIC_WORKER_URL` build-time
+environment variable (Astro `PUBLIC_` convention), defaulting to
+`http://localhost:8787`.
 
-1. In `frontend/src/pages/index.astro`, update the default `workerUrl` prop
-2. Or set `window.WORKER_URL` before the app loads
+- Local build against a custom Worker:
+  ```bash
+  cd frontend
+  PUBLIC_WORKER_URL="https://your-worker.workers.dev" npm run build
+  ```
+- In CI (GitHub Actions), set a repository **variable** named `PUBLIC_WORKER_URL`
+  (Settings -> Secrets and variables -> Actions -> Variables). The deploy workflow
+  passes it into the build automatically.
+
+The GitHub Pages base path is configured as `/v1` in `frontend/astro.config.mjs`
+(`site`/`base`) to match the project page `https://pavanchow.github.io/v1/`.
 
 ### Deployment
 
-#### Manual Deployment
+#### Frontend -> GitHub Pages (automated, live)
 
-**Deploy Frontend to GitHub Pages:**
-```bash
-cd frontend
-npm run build
-# Deploy the dist folder to gh-pages branch
-```
+Pages is enabled with the "GitHub Actions" build source. Every push to `main`
+runs `.github/workflows/deploy.yml`, which builds the Astro site and publishes it
+to `https://pavanchow.github.io/v1/`. No secrets required.
 
-**Deploy Scanner to Cloudflare:**
+#### Scanner -> Cloudflare Workers (needs a Cloudflare account)
+
+The Worker is fully runnable locally but not yet deployed, because deploying
+requires Cloudflare credentials. To deploy it:
+
 ```bash
 cd scanner
-# Login to Cloudflare
-npx wrangler login
-# Deploy
-npm run deploy
+npx wrangler login          # interactive, OR export CLOUDFLARE_API_TOKEN
+npm run deploy              # wrangler deploy
 ```
 
-#### Automated Deployment (CI/CD)
+For CI deployment, add a repository **secret** `CLOUDFLARE_API_TOKEN` (a Cloudflare
+API token with the "Edit Cloudflare Workers" permission). The `deploy-scanner` job
+in the workflow runs the tests on every push and deploys the Worker only when that
+secret is present, so the pipeline stays green without it.
 
-The GitHub Actions workflow automatically deploys both components when you push to `main`:
-
-1. Go to your GitHub repository settings
-2. Add the following secrets:
-   - `CLOUDFLARE_API_TOKEN`: Your Cloudflare API token with Workers permissions
-
-3. Push to main branch to trigger deployment
+After deploying the Worker, set the `PUBLIC_WORKER_URL` repo variable to the
+Worker's URL and re-run the frontend deploy so the hosted UI targets it.
 
 ## API Reference
 
