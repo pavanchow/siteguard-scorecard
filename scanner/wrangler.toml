@@ -5,13 +5,3 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
-
-# CORS settings for frontend access
-[[rules]]
-type = "Text"
-globs = ["**/*.txt"]
-fallthrough = true
-
-# Allow requests from frontend during development
-[site]
-bucket = "./public"

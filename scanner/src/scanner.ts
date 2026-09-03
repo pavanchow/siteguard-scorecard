@@ -104,6 +104,18 @@ export interface SubdomainFinding {
   recommendation: string;
 }
 
+interface DnsAnswer {
+  name: string;
+  type: number;
+  TTL?: number;
+  data: string;
+}
+
+interface DnsJsonResponse {
+  Status?: number;
+  Answer?: DnsAnswer[];
+}
+
 // Vulnerable provider patterns for subdomain takeover detection
 const VULNERABLE_PROVIDERS: Record<string, RegExp[]> = {
   'GitHub Pages': [/^.*\.github\.io$/, /^.*\.pages\.github\.com$/],
@@ -124,7 +136,7 @@ const VULNERABLE_PROVIDERS: Record<string, RegExp[]> = {
 /**
  * Check security headers on the target website
  */
-async function checkSecurityHeaders(url: string): Promise<SecurityHeadersCheck> {
+export async function checkSecurityHeaders(url: string): Promise<SecurityHeadersCheck> {
   const requiredHeaders = [
     {
       name: 'Strict-Transport-Security',
@@ -204,10 +216,11 @@ async function checkSecurityHeaders(url: string): Promise<SecurityHeadersCheck> 
 /**
  * Check cookie security flags
  */
-async function checkCookieFlags(url: string): Promise<CookieFlagsCheck> {
+export async function checkCookieFlags(url: string): Promise<CookieFlagsCheck> {
   try {
     const response = await fetch(url, { method: 'GET', redirect: 'follow' });
-    const setCookieHeaders = response.headers.getSetCookie?.() || [];
+    const cookieHeaders = response.headers as Headers & { getSetCookie?: () => string[] };
+    const setCookieHeaders = cookieHeaders.getSetCookie?.() || [];
 
     if (setCookieHeaders.length === 0) {
       return {
@@ -219,7 +232,6 @@ async function checkCookieFlags(url: string): Promise<CookieFlagsCheck> {
     }
 
     const findings: CookieFinding[] = [];
-    const requiredFlags = ['Secure', 'HttpOnly', 'SameSite'];
 
     for (const cookie of setCookieHeaders) {
       const cookieName = cookie.split('=')[0]?.trim() || 'unknown';
@@ -272,7 +284,7 @@ async function checkCookieFlags(url: string): Promise<CookieFlagsCheck> {
 /**
  * Check for exposed sensitive files
  */
-async function checkExposedFiles(url: string): Promise<ExposedFilesCheck> {
+export async function checkExposedFiles(url: string): Promise<ExposedFilesCheck> {
   const sensitivePaths = [
     {
       path: '/.git/HEAD',
@@ -348,7 +360,7 @@ async function checkExposedFiles(url: string): Promise<ExposedFilesCheck> {
 /**
  * Check TLS configuration
  */
-async function checkTLS(url: string): Promise<TLSCheck> {
+export async function checkTLS(url: string): Promise<TLSCheck> {
   try {
     const parsedUrl = new URL(url);
     if (parsedUrl.protocol !== 'https:') {
@@ -400,7 +412,7 @@ async function checkTLS(url: string): Promise<TLSCheck> {
 /**
  * Check for mixed content (HTTP resources on HTTPS pages)
  */
-async function checkMixedContent(url: string): Promise<MixedContentCheck> {
+export async function checkMixedContent(url: string): Promise<MixedContentCheck> {
   try {
     const response = await fetch(url, { method: 'GET', redirect: 'follow' });
     const html = await response.text();
@@ -490,8 +502,8 @@ async function checkSubdomainTakeover(url: string): Promise<SubdomainTakeoverChe
         },
       });
       
-      const dnsData = await dnsResponse.json();
-      
+      const dnsData = await dnsResponse.json() as DnsJsonResponse;
+
       if (dnsData.Answer) {
         for (const answer of dnsData.Answer) {
           if (answer.type === 5) { // CNAME record type
@@ -558,7 +570,7 @@ async function checkSubdomainTakeover(url: string): Promise<SubdomainTakeoverChe
 /**
  * Calculate overall grade from score
  */
-function calculateGrade(score: number): 'A' | 'B' | 'C' | 'D' | 'F' {
+export function calculateGrade(score: number): 'A' | 'B' | 'C' | 'D' | 'F' {
   if (score >= 90) return 'A';
   if (score >= 80) return 'B';
   if (score >= 70) return 'C';

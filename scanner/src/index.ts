@@ -79,7 +79,7 @@ app.post('/scan', async (c) => {
 
 // Handle OPTIONS preflight requests
 app.options('/scan', (c) => {
-  return c.text('', 204);
+  return c.body(null, 204);
 });
 
 // 404 handler
