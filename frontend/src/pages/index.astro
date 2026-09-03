@@ -1,11 +1,9 @@
 ---
 import '../styles/global.css';
+import App from '../components/App';
 
-export interface Props {
-  workerUrl: string;
-}
-
-const { workerUrl = 'http://localhost:8787' } = Astro.props;
+const workerUrl = import.meta.env.PUBLIC_WORKER_URL ?? 'http://localhost:8787';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <!doctype html>
@@ -15,7 +13,7 @@ const { workerUrl = 'http://localhost:8787' } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Scan your website for security vulnerabilities and get a comprehensive security scorecard" />
     <title>SiteGuard Scorecard - Website Security Scanner</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
   </head>
   <body class="bg-dark-900 text-white min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -29,15 +27,13 @@ const { workerUrl = 'http://localhost:8787' } = Astro.props;
         </p>
       </header>
 
-      <main id="app" data-worker-url={workerUrl}>
-        <!-- React app will hydrate here -->
+      <main>
+        <App client:only="react" workerUrl={workerUrl} />
       </main>
 
       <footer class="mt-16 text-center text-gray-500 text-sm">
         <p>&copy; 2024 SiteGuard Scorecard. Built with Astro, React, and Cloudflare Workers.</p>
       </footer>
     </div>
-
-    <script type="module" src="../scripts/main.tsx"></script>
   </body>
 </html>
