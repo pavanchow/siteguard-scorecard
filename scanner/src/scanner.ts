@@ -315,16 +315,34 @@ export async function checkExposedFiles(url: string): Promise<ExposedFilesCheck>
   const baseUrl = new URL(url);
   const findings: ExposedFileFinding[] = [];
 
+  // Check each sensitive file both at the domain root (the usual place) and
+  // relative to the scanned URL's own directory, so a site served under a base
+  // path (for example a GitHub Pages project site at /repo/) is not missed.
+  const dirBase = baseUrl.href.endsWith('/') ? baseUrl.href : `${baseUrl.href}/`;
   const checkPromises = sensitivePaths.map(async (item) => {
     try {
-      const checkUrl = `${baseUrl.protocol}//${baseUrl.host}${item.path}`;
-      const response = await fetch(checkUrl, { method: 'HEAD', redirect: 'error' });
-      const accessible = response.status === 200;
-      
+      const rootUrl = `${baseUrl.protocol}//${baseUrl.host}${item.path}`;
+      const scopedUrl = new URL(item.path.replace(/^\/+/, ''), dirBase).toString();
+      const candidates = scopedUrl === rootUrl ? [rootUrl] : [rootUrl, scopedUrl];
+
+      // redirect:'manual' so a 3xx is reported as its status (a redirect means
+      // the file is not directly served) instead of throwing, which previously
+      // dropped every path into the catch below as a false "not accessible".
+      let statusCode = 0;
+      let accessible = false;
+      for (const candidate of candidates) {
+        const response = await fetch(candidate, { method: 'GET', redirect: 'manual' });
+        statusCode = response.status;
+        if (response.status === 200) {
+          accessible = true;
+          break;
+        }
+      }
+
       return {
         path: item.path,
         accessible,
-        statusCode: response.status,
+        statusCode,
         severity: item.severity,
         description: item.description,
         recommendation: item.recommendation,
