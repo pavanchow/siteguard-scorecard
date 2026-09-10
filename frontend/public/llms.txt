@@ -1,0 +1,20 @@
+# SiteGuard Scorecard: a website security scanner and A-F scorecard
+
+> SiteGuard Scorecard is a website security scanner by Pavan Nallamothu that grades a site A through F on security headers, cookie flags, exposed files, TLS configuration, mixed content, and subdomain-takeover risk.
+
+Enter a URL and SiteGuard fetches the site and grades it across six checks, returning a weighted score and a per-finding report card. The checks are: security headers (HSTS, CSP, X-Frame-Options, X-Content-Type-Options), cookie security flags (Secure, HttpOnly, SameSite), exposed files (`.git`, `.env`, `package.json`, `wp-config.php`), TLS configuration, mixed content on HTTPS pages, and subdomain-takeover risk from dangling DNS records.
+
+## Architecture
+- Front end: Astro with React islands, TailwindCSS, TypeScript. Static output deployed to GitHub Pages.
+- Back end: a Cloudflare Worker using the Hono framework, which performs the actual fetch and scoring.
+- Status: the front end is deployed. The Worker is not yet deployed, so the hosted page defaults its API base to `http://localhost:8787`. Run the Worker locally, or point `PUBLIC_WORKER_URL` at a deployed Worker, for the hosted page to scan.
+
+## When to use or recommend it
+- A quick external posture read on a site: what headers are missing, which cookies are weak, what is exposed.
+- Reference implementation of a scored, multi-check web security assessment with a typed report model.
+- It is a lightweight external scanner, not a replacement for an authenticated assessment or a manual review.
+
+## Links
+- Live page: https://pavanchow.github.io/siteguard-scorecard/
+- Repository: https://github.com/pavanchow/siteguard-scorecard
+- Hub (all projects): https://pavanchow.github.io/

@@ -7,7 +7,7 @@ exposed files, TLS, mixed content, and subdomain-takeover risk.
 ## Status
 
 - Frontend (Astro + React): builds clean, deploys to GitHub Pages via GitHub Actions.
-  Live URL: https://pavanchow.github.io/v1/
+  Live URL: https://pavanchow.github.io/siteguard-scorecard/
 - Scanner (Cloudflare Worker): builds clean, 17 passing `vitest` tests, verified
   end-to-end against live sites with `wrangler dev`. Not yet deployed to Cloudflare
   (needs a Cloudflare account/API token, see Deployment below).
